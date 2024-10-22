@@ -14,12 +14,13 @@ If you want to get familiar with Bauplan, start with our [tutorial](https://docs
 We will use some [Jupyter Notebooks](https://jupyter.org/) in this example, so we need to install the right dependencies to run them. Go into `ml-workflow`, and create a proper virtual environment.
 
 ```bash
+cd ml-workflow
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Make sure to creare a `bauplan_project.yml` file with a unique `project id`, a `project name` and a default Python interpreter where you pipeline is `/pipeline`.
+Make sure to creare a `bauplan_project.yml` file with a unique `project id`, a `project name` and a default Python interpreter where you pipeline is located `/pipeline`.
 
 ```yaml
 project:
