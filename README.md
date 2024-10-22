@@ -1,10 +1,17 @@
 # A machine learning pipeline
 
-In this example we show how to organize and run a simple machine learning project with Bauplan. We will build and run a pipeline that takes some raw data from the [TLC NY taxi dataset](taxi), transforms it into a training dataset with the right features, trains a Linear Regression model to predict **the tip amount** of taxi rides, and writes the predictions to an Iceberg table. We will also use the Bauplan SDK in some notebooks to explore the dataset and the predictions.
+In this example we show how to organize and run a simple machine learning project with bauplan. We will build and run a pipeline that takes some raw data from the [TLC NY taxi dataset](taxi), transforms it into a training dataset with the right features, trains a Linear Regression model to predict **the tip amount** of taxi rides, and writes the predictions to an Iceberg table. We will also use the Bauplan SDK in some notebooks to explore the dataset and the predictions.
+
+## Preliminary steps
+
+👉👉👉 To use Bauplan, you need an API key for our preview environment: you can request one [here](https://www.bauplanlabs.com/#join).
+
+If you want to get familiar with Bauplan, start with our [tutorial](https://docs.bauplanlabs.com/en/latest/tutorial/01_quick_start.html#)
+
 
 ## Set up
 
-We will use some [Jupyter Notebooks](https://jupyter.org/) in this example, so we need to install the right dependencies to run them. Go into `examples/03-ml-workflow`, and create a proper virtual environment.
+We will use some [Jupyter Notebooks](https://jupyter.org/) in this example, so we need to install the right dependencies to run them. Go into `ml-workflow`, and create a proper virtual environment.
 
 ```bash
 python -m venv venv
@@ -12,11 +19,11 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-As usual, make sure we have a `bauplan_project.yml` file with a unique `project id`, a `project name` and a default Python interpreter.
+Make sure to creare a `bauplan_project.yml` file with a unique `project id`, a `project name` and a default Python interpreter where you pipeline is `/pipeline`.
 
 ```yaml
 project:
-    id: a8133e8c-mnhd-490a-3plk-223abaf6098j
+    id: a8133e8c-5abd-490a-b12e-223abaf60981
     name: machine-learning-workflow
 ```
 
@@ -34,7 +41,7 @@ id3[train_regression_model]-->id4[tip_predictions]
 
 ## Exploratory analysis
 
-The first things we are going to do is use one of our notebooks to explore the dataset and understand what are the best features to train our model. This is a fairly simple thing to do, thanks to our SDK. Start Jupyter Lab and then open the notebook `feature_exploration.ipynb` (check directly the code in there is commented).
+The first thing we are going to do is to use one of our notebooks to explore the dataset and understand what are the best features to train our model. This is a fairly simple thing to do, thanks to our SDK. Start Jupyter Lab and then open the notebook `feature_exploration.ipynb` (check directly the code in there is commented).
 
 ```bash
 cd notebooks
@@ -43,11 +50,11 @@ cd notebooks
 
 In the notebook, we get a sample of data from `taxi_fhvhv` and compute a correlation matrix to print a heat map that will tell us which features have the strongest correlation with our target variable `tips`. The top features are `base_passnger_fare`, `trip_miles` and `trip_time`, so we are going to use these columns to train the Linear Regression model.
 
-![ml1.png](/img/ml1.png)
+![ml1.png](ml-workflow/img/ml1.png)
 
 ## Prepare the training dataset
 
-The first function of our pipeline gets us the data set we are going to work with. Using the usual Python S3 scan, the function `clean_taxi_trips` retrieves 10 columns from the table `taxi_fhvhv`, filtering for `pickup_datetime`. This will give us 6 months of data for a total of approximately 19GB. This should also give you a good idea of how performant the system is when you work on reasonably large data samples.
+The first function of our pipeline gets us the data set we are going to work with. Using our Python S3 scan, the function `clean_taxi_trips` retrieves 10 columns from the table `taxi_fhvhv`, filtering for `pickup_datetime`. This will give us 6 months of data for a total of approximately 19GB. This should also give you a good idea of how performant the system is when you work on reasonably large data samples.
 
 ```python
 import bauplan
@@ -273,7 +280,21 @@ def tip_predictions(
 
 ## Explore the results
 
-Once the prediction made by a model as materialized in the data catalog as an Iceberg table, we can use the Bauplan SDK to integrate the table into exploration tools like notebooks or into visualization app.
+First of all, we create a branch checkout in such branch.
+
+```bash
+bauplan branch create <YOUR_USERNAME>.<YOUR_BRANCH_NAME>
+bauplan branch checkout <YOUR_USERNAME>.<YOUR_BRANCH_NAME>
+```
+
+We now run the pipeline to materialize in the data catalog as an Iceberg table the prediction made by our model.
+
+```bash
+cd pipeline
+bauplan run
+```
+
+Finally, it is time to use the Bauplan SDK to integrate the table into exploration tools like notebooks or into visualization app.
 
 To visualize how accurate our predictions are, we use a few different types of plots in the notebook using `matplotlib` and `seaborn`. As usual by using the SDK and Bauplan's method `query` to interact with the data directly in our branch of the data catalog.
 
@@ -288,21 +309,26 @@ We will have three different plots to help us understand how good is the linear 
 
 **Actual vs. Predicted Values Plot**: This scatter plot shows how well the predicted values match the actual values. Ideally, the points should lie on the line `y = x`.
 
-![ml2.png](/img/ml2.png)
+![ml2.png](ml-workflow/img/ml2.png)
 
 **Residual Plot**: This plot shows the residuals (differences between actual and predicted values) against the predicted values. Ideally, the residuals should be randomly distributed around zero, indicating that the model captures the data's patterns.
 
-![ml3.png](/img/ml3.png)
+![ml3.png](ml-workflow/img/ml3.png)
 
 **Distribution of Residuals**: This histogram shows the distribution of the residuals. Ideally, the residuals should be normally distributed around zero.
 
-![ml4.png](/img/ml4.png)
+![ml4.png](ml-workflow/img/ml4.png)
 
 The code in there is heavily commented, so you can explore it directly in the notebook.
 
-## Summary
+## More about bauplan
 
-In this chapter:
+Bauplan is the programmable lakehouse: you can load, transform, query data all from your code (CLI or Python). You can learn more [here](https://www.bauplanlabs.com/), read the [docs](https://docs.bauplanlabs.com/) or explore its [architecture](https://arxiv.org/pdf/2308.05368) and [ergonomics](https://arxiv.org/pdf/2404.13682).
 
-- We demonstrated how to use Bauplan to create a machine learning pipeline that predicts the tip amount for taxi rides.
-- We explored the dataset, prepared the training data, trained a Linear
+To use Bauplan, you need an API key for our preview environment: you can request one [here](https://www.bauplanlabs.com/#join).
+
+Note: the current SDK version is `0.0.3a182` but it is subject to change as the platform continues to evolve - ping us if you need help with any of the APIs used in this project.
+
+## Do you wanna know more?
+
+Bauplan is the serverless lakehouse: you can load, transform, query data all from your code (CLI or Python). You can learn more [here](https://www.bauplanlabs.com/), read the [docs](https://docs.bauplanlabs.com/) or explore its [architecture](https://arxiv.org/pdf/2308.05368) and [ergonomics](https://arxiv.org/pdf/2404.13682).
