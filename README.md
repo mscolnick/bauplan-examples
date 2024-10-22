@@ -321,14 +321,6 @@ We will have three different plots to help us understand how good is the linear 
 
 The code in there is heavily commented, so you can explore it directly in the notebook.
 
-## More about bauplan
-
-Bauplan is the programmable lakehouse: you can load, transform, query data all from your code (CLI or Python). You can learn more [here](https://www.bauplanlabs.com/), read the [docs](https://docs.bauplanlabs.com/) or explore its [architecture](https://arxiv.org/pdf/2308.05368) and [ergonomics](https://arxiv.org/pdf/2404.13682).
-
-To use Bauplan, you need an API key for our preview environment: you can request one [here](https://www.bauplanlabs.com/#join).
-
-Note: the current SDK version is `0.0.3a182` but it is subject to change as the platform continues to evolve - ping us if you need help with any of the APIs used in this project.
-
 ## Do you wanna know more?
 
 Bauplan is the serverless lakehouse: you can load, transform, query data all from your code (CLI or Python). You can learn more [here](https://www.bauplanlabs.com/), read the [docs](https://docs.bauplanlabs.com/) or explore its [architecture](https://arxiv.org/pdf/2308.05368) and [ergonomics](https://arxiv.org/pdf/2404.13682).
