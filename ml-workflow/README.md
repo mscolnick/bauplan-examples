@@ -90,7 +90,7 @@ def clean_taxi_trips(
     return df
 ```
 
-For the second function, we only care about a subset of the data retrieved, so we will explicitly declare in the definition of the input model the columns that we want. The function uses then Pandas and Scikit-Learn to prepare a normalizes dataset that we can use as a training set for the ML model. In particular, we take care of log-normalizing the distribution of one of our training features `trip_miles` and to rescale all features to make sure that we don't accidentally rely on different scales.
+For the second function, we only care about a subset of the data retrieved, so we will explicitly declare in the definition of the input model the columns that we want. The function uses then Pandas and Scikit-Learn to prepare a normalized dataset that we can use as a training set for the ML model. In particular, we take care of log-normalizing the distribution of one of our training features `trip_miles` and to rescale all features to make sure that we don't accidentally rely on different scales.
 
 ```python
 @bauplan.model(materialize=False)
