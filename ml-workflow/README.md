@@ -20,14 +20,6 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Make sure to creare a `bauplan_project.yml` file with a unique `project id`, a `project name` and a default Python interpreter where you pipeline is located `/pipeline`.
-
-```yaml
-project:
-    id: a8133e8c-5abd-490a-b12e-223abaf60981
-    name: machine-learning-workflow
-```
-
 ## The pipeline
 
 In the folder you can find a file called `models.py` with the pipeline of this example. This pipeline will train a Linear Regression model that predicts the **tip amount** of taxi rides.
@@ -51,11 +43,11 @@ cd notebooks
 
 In the notebook, we get a sample of data from `taxi_fhvhv` and compute a correlation matrix to print a heat map that will tell us which features have the strongest correlation with our target variable `tips`. The top features are `base_passnger_fare`, `trip_miles` and `trip_time`, so we are going to use these columns to train the Linear Regression model.
 
-![ml1.png](ml-workflow/img/ml1.png)
+![ml1.png](/ml-workflow/img/ml1.png)
 
 ## Prepare the training dataset
 
-The first function of our pipeline gets us the data set we are going to work with. Using our Python S3 scan, the function `clean_taxi_trips` retrieves 10 columns from the table `taxi_fhvhv`, filtering for `pickup_datetime`. This will give us 6 months of data for a total of approximately 19GB. This should also give you a good idea of how performant the system is when you work on reasonably large data samples.
+The first function of our pipeline gets us the [data set](https://docs.bauplanlabs.com/en/latest/datasets.html#taxi-fhvhv) we are going to work with. Using our Python S3 scan, the function `clean_taxi_trips` retrieves 10 columns from the table `taxi_fhvhv`, filtering for `pickup_datetime`. This will give us 6 months of data for a total of approximately 19GB. This should also give you a good idea of how performant the system is when you work on reasonably large data samples.
 
 ```python
 import bauplan
@@ -137,13 +129,13 @@ def training_dataset(
     # print the size of the training dataset
     print(f"The training dataset has {len(scaled_df)} rows")
 
-    # The result is a new array where each feature will have a mean of 0 and a standard deviation of 1
+    # The result is a new table where each feature will have a mean of 0 and a standard deviation of 1
     return scaled_df
 ```
 
 ## Train the model
 
-We can train a model as we do everything else as a step in a pipeline, by running arbitrary code in a Bauplan model. The model `train_linear_regression` uses Scikit-Learn to prepare a test, validation and test set and set the training features apart from the target feature. Once the dataset has been split into three, we can simply train the model using Sciki-Learn's built-in `LinearRegression` method.
+Like any other pipeline step, we can train a model by running arbitrary code in a Bauplan model. The model `train_linear_regression` uses Scikit-Learn to prepare a test, validation and test set and set the training features apart from the target feature. Once the dataset has been split into three, we can simply train the model using Sciki-Learn's built-in `LinearRegression` method.
 
 ## Passing models across functions
 
@@ -163,6 +155,7 @@ In this way, it is possible to pass Machine Learning models across Bauplan funct
 @bauplan.model(columns=['*'], materialize=False)
 @bauplan.python('3.11', pip={'scikit-learn': '1.3.2'})
 def train_model(data='my_table'):
+
     from sklearn.linear_model import LinearRegression
     reg = LinearRegression().fit(X_train, y_train)
 
@@ -175,10 +168,11 @@ def train_model(data='my_table'):
 @bauplan.model(columns=['*'], materialize=False)
 @bauplan.python('3.11', pip={'scikit-learn': '1.3.2'})
 def run_model(data='train_model'):
+
     from bauplan.store import save_obj
     reg = load_obj("regression")
 
-    from sklearn.linear_model import LinearRegression
+        from sklearn.linear_model import LinearRegression
     y_hat = reg.predict(data='train_model')
 
     prediction_table = data[['feature']
@@ -250,11 +244,14 @@ def train_regression_model(
 @bauplan.model(materialize=True)
 # for this function we specify two dependencies, Pandas 2.2.0 and Scikit-Learn 1.3.2
 @bauplan.python('3.11', pip={'scikit-learn': '1.3.2', 'pandas': '2.1.0'})
+
 def tip_predictions(
         data=bauplan.Model(
             'train_regression_model',
         )
+
 ):
+
     # retrieve the model trained in the previous step of the DAG from the key, value store
     from bauplan.store import load_obj
     reg = load_obj("regression")
@@ -281,14 +278,14 @@ def tip_predictions(
 
 ## Explore the results
 
-First of all, we create a branch checkout in such branch.
+First of all, we create a branch and checkout in such branch.
 
 ```bash
 bauplan branch create <YOUR_USERNAME>.<YOUR_BRANCH_NAME>
 bauplan branch checkout <YOUR_USERNAME>.<YOUR_BRANCH_NAME>
 ```
 
-We now run the pipeline to materialize in the data catalog as an Iceberg table the prediction made by our model.
+We now run the pipeline to materialize our model's predictions as an Iceberg table in the data catalog.
 
 ```bash
 cd pipeline
@@ -310,15 +307,15 @@ We will have three different plots to help us understand how good is the linear 
 
 **Actual vs. Predicted Values Plot**: This scatter plot shows how well the predicted values match the actual values. Ideally, the points should lie on the line `y = x`.
 
-![ml2.png](ml-workflow/img/ml2.png)
+![ml2.png](/ml-workflow/img/ml2.png)
 
 **Residual Plot**: This plot shows the residuals (differences between actual and predicted values) against the predicted values. Ideally, the residuals should be randomly distributed around zero, indicating that the model captures the data's patterns.
 
-![ml3.png](ml-workflow/img/ml3.png)
+![ml3.png](/ml-workflow/img/ml3.png)
 
 **Distribution of Residuals**: This histogram shows the distribution of the residuals. Ideally, the residuals should be normally distributed around zero.
 
-![ml4.png](ml-workflow/img/ml4.png)
+![ml4.png](/ml-workflow/img/ml4.png)
 
 The code in there is heavily commented, so you can explore it directly in the notebook.
 
