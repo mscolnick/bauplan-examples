@@ -4,7 +4,7 @@
 
 👉👉👉 To use bauplan, you need an API key for our preview environment: you can request one [here](https://www.bauplanlabs.com/#join).
 
-If you want to get familiar with Bauplan, start with our [tutorial](https://docs.bauplanlabs.com/en/latest/tutorial/01_quick_start.html#)
+If you want to get familiar with bauplan, start with our [tutorial](https://docs.bauplanlabs.com/en/latest/tutorial/01_quick_start.html#)
 
 ## Examples
 
