@@ -1,24 +1,28 @@
 """
 
-This script collects Bauplan models that form a machine learning pipeline:
+This script contains bauplan models that form a complete machine learning pipeline:
 
-- clean_taxi_trips runs a Python S3 scan against the Iceberg table taxi_fhvhv, retrieves a reasonably large chunk of data
-and uses Pandas code to clean some columns.
-- training_dataset uses Pandas and Scikit-learn to prepare a training dataset with training and target features
-and normalize the data distribution.
-- train_regression_model splits the dataset into train, validation and test sets, then trains a Linear Regression model
-and store it in a key, value store, and returns the test set to feed into the next function.
-- tip_predictions retrieves the regression model from the key, value store and run it against the test_set to produce a table of predictions.
+clean_taxi_trips:
+Performs an S3 scan on the Iceberg table taxi_fhvhv, retrieving a sizable chunk of data. It uses Pandas to clean specific columns for further processing.
 
-Note that collecting models in a single file called models.py is not required, but we find it useful to keep the pipeline code together.
+training_dataset:
+Prepares a training dataset using Pandas and Scikit-learn by selecting features, defining target variables, and normalizing the data distribution.
+
+train_regression_model:
+Splits the dataset into train, validation, and test sets, then trains a Linear Regression model. The model is saved in a key-value store, and the test set is returned for use in the next step.
+
+tip_predictions:
+Retrieves the trained regression model from the key-value store and uses it to generate predictions on the test set, producing a table of results.
+
+While it is not mandatory to group all models in a single models.py file, we recommend doing so to keep the pipeline code organized and maintainable.
 
 """
-
 
 import bauplan
 
 
-@bauplan.model(materialize=False)
+@bauplan.model()
+# for this function we specify one dependency, Pandas 2.2.0
 @bauplan.python('3.11', pip={'pandas': '2.2.0'})
 def clean_taxi_trips(
         data=bauplan.Model(
@@ -36,7 +40,7 @@ def clean_taxi_trips(
                 'tolls',
                 'sales_tax',
                 'tips'],
-            filter="pickup_datetime >= '2023-06-01T00:00:00-05:00' AND pickup_datetime < '2023-12-30T00:00:00-05:00'"
+            filter="pickup_datetime >= '2023-01-01T00:00:00-05:00' AND pickup_datetime < '2023-03-31T00:00:00-05:00'"
         )
 ):
     import math
@@ -48,6 +52,7 @@ def clean_taxi_trips(
 
     # input data is always an Arrow table, so if you wish to use pandas, you need an explicit conversion
     df = data.to_pandas()
+
     # exclude rows based on multiple conditions
     df = df[(df['trip_miles'] > 1.0) & (df['tips'] > 0.0) & (df['base_passenger_fare'] > 1.0)]
 
@@ -55,7 +60,7 @@ def clean_taxi_trips(
     return df
 
 
-@bauplan.model(materialize=False)
+@bauplan.model()
 # for this function we specify two dependencies, Pandas 2.2.0 and Scikit-Learn 1.3.2
 @bauplan.python('3.10', pip={'pandas': '1.5.3', 'scikit-learn': '1.3.2'})
 def training_dataset(
@@ -95,7 +100,7 @@ def training_dataset(
     return scaled_df
 
 
-@bauplan.model(materialize=False)
+@bauplan.model()
 # for this function we specify two dependencies, Pandas 2.2.0 and Scikit-Learn 1.3.2
 @bauplan.python('3.11', pip={'pandas': '2.2.0', 'scikit-learn': '1.3.2'})
 def train_regression_model(
@@ -150,7 +155,7 @@ def train_regression_model(
     return test_set
 
 
-@bauplan.model(materialize=True)
+@bauplan.model(materialization_strategy='REPLACE')
 # for this function we specify two dependencies, Pandas 2.2.0 and Scikit-Learn 1.3.2
 @bauplan.python('3.11', pip={'scikit-learn': '1.3.2', 'pandas': '2.1.0'})
 def tip_predictions(
