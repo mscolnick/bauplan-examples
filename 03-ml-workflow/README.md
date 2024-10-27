@@ -14,7 +14,7 @@ If you want to get familiar with Bauplan, start with our [tutorial](https://docs
 We will use some [Jupyter Notebooks](https://jupyter.org/) in this example, so we need to install the right dependencies to run them. Go into `ml-workflow`, and create a proper virtual environment.
 
 ```bash
-cd 02-ml-workflow
+cd 03-ml-workflow
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
@@ -43,7 +43,7 @@ cd notebooks
 
 In the notebook, we get a sample of data from `taxi_fhvhv` and compute a correlation matrix to print a heat map that will tell us which features have the strongest correlation with our target variable `tips`. The top features are `base_passnger_fare`, `trip_miles` and `trip_time`, so we are going to use these columns to train the Linear Regression model.
 
-![ml1.png](/02-ml-workflow/img/ml1.png)
+![ml1.png](/03-ml-workflow/img/ml1.png)
 
 ## Prepare the training dataset
 
@@ -307,15 +307,15 @@ We will have three different plots to help us understand how good is the linear 
 
 **Actual vs. Predicted Values Plot**: This scatter plot shows how well the predicted values match the actual values. Ideally, the points should lie on the line `y = x`.
 
-![ml2.png](/02-ml-workflow/img/ml2.png)
+![ml2.png](/03-ml-workflow/img/ml2.png)
 
 **Residual Plot**: This plot shows the residuals (differences between actual and predicted values) against the predicted values. Ideally, the residuals should be randomly distributed around zero, indicating that the model captures the data's patterns.
 
-![ml3.png](/02-ml-workflow/img/ml3.png)
+![ml3.png](/03-ml-workflow/img/ml3.png)
 
 **Distribution of Residuals**: This histogram shows the distribution of the residuals. Ideally, the residuals should be normally distributed around zero.
 
-![ml4.png](/02-ml-workflow/img/ml4.png)
+![ml4.png](/03-ml-workflow/img/ml4.png)
 
 The code in there is heavily commented, so you can explore it directly in the notebook.
 
