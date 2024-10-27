@@ -8,7 +8,7 @@ If you want to get familiar with bauplan, start with our [tutorial](https://docs
 
 ## Examples
 
-1. [Machine Learning Workflow](ml-workflow/README.md)
+1. [Machine Learning Workflow](02-ml-workflow/README.md)
 
 ## Do you wanna know more?
 
