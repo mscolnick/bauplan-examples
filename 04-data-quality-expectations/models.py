@@ -41,7 +41,7 @@ def normalized_taxi_trips(
 
     # join 'trips' with 'zones' on 'PULocationID' so get all the Zones and the Boroughs associated to each pickup location
     pickup_location_table = trips.join(zones, 'PULocationID', 'LocationID').combine_chunks()
-    pickup_location_table = pc.drop_null(pickup_location_table)
+    #pickup_location_table = pc.drop_null(pickup_location_table)
 
     # return an arrow table
     return pickup_location_table
