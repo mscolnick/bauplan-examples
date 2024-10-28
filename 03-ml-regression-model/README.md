@@ -43,7 +43,7 @@ cd notebooks
 
 In the notebook, we get a sample of data from `taxi_fhvhv` and compute a correlation matrix to print a heat map that will tell us which features have the strongest correlation with our target variable `tips`. The top features are `base_passnger_fare`, `trip_miles` and `trip_time`, so we are going to use these columns to train the Linear Regression model.
 
-![ml1.png](/03-ml-regression-model/img/ml1.png)
+![ml1.png](img%2Fml1.png)
 
 ## Prepare the training dataset
 
@@ -52,13 +52,12 @@ The first function of our pipeline gets us the [data set](https://docs.bauplanla
 ```python
 import bauplan
 
-@bauplan.model(materialize=False)
+
+@bauplan.model()
 @bauplan.python('3.11', pip={'pandas': '2.2.0'})
 def clean_taxi_trips(
         data=bauplan.Model(
             'taxi_fhvhv',
-            # this function performs an S3 scan directly in Python, so we can specify the columns and the filter pushdown
-            # by pushing the filters down to S3 we make the system considerably more performant
             columns=[
                 'pickup_datetime',
                 'dropoff_datetime',
@@ -70,32 +69,26 @@ def clean_taxi_trips(
                 'tolls',
                 'sales_tax',
                 'tips'],
-            filter="pickup_datetime >= '2022-06-01T00:00:00-05:00' AND pickup_datetime < '2023-11-30T00:00:00-05:00'"
+            filter="pickup_datetime >= '2023-01-01T00:00:00-05:00' AND pickup_datetime < '2023-03-31T00:00:00-05:00'"
         )
 ):
     import math
     import pandas as pd
-    import numpy as np
 
-    # debugging lines to check print the version of Python interpreter and the size of the table
     size_in_gb = data.nbytes / math.pow(1024, 3)
     print(f"This table is {size_in_gb} GB and has {data.num_rows} rows")
 
-    # input data is always an Arrow table, so if you wish to use pandas, you need an explicit conversion
     df = data.to_pandas()
-    # exclude rows based on multiple conditions
     df = df[(df['trip_miles'] > 1.0) & (df['tips'] > 0.0) & (df['base_passenger_fare'] > 1.0)]
 
-    # output the data as a Pandas dataframe
     return df
 ```
 
 For the second function, we only care about a subset of the data retrieved, so we will explicitly declare in the definition of the input model the columns that we want. The function uses then Pandas and Scikit-Learn to prepare a normalized dataset that we can use as a training set for the ML model. In particular, we take care of log-normalizing the distribution of one of our training features `trip_miles` and to rescale all features to make sure that we don't accidentally rely on different scales.
 
 ```python
-@bauplan.model(materialize=False)
-# for this function we specify two dependencies, Pandas 2.2.0 and Scikit-Learn 1.3.2
-@bauplan.python('3.11', pip={'pandas': '2.2.0', 'scikit-learn': '1.3.2'})
+@bauplan.model()
+@bauplan.python('3.10', pip={'pandas': '1.5.3', 'scikit-learn': '1.3.2'})
 def training_dataset(
         data=bauplan.Model(
             'clean_taxi_trips',
@@ -105,31 +98,22 @@ def training_dataset(
     import numpy as np
     from sklearn.preprocessing import StandardScaler
 
-    # convert data from Arrow to Pandas
     df = data.to_pandas()
 
-    # drop all the rows with NaN values
     df = df.dropna()
-    # add a new column with log transformed trip_miles to deal with skewed distributions
     df['log_trip_miles'] = np.log10(df['trip_miles'])
-    # define training and target features
     features = df[['log_trip_miles', 'base_passenger_fare', 'trip_time']]
     target = df['tips']
     pickup_dates = df['pickup_datetime']
 
-    # scale the features to ensure that they have similar scales
-    # compute the mean and standard deviation for each feature in the training set
-    # then use the computed mean and standard deviation to scale the features.
     scaler = StandardScaler()
     scaled_features = scaler.fit_transform(features)
     scaled_df = pd.DataFrame(scaled_features, columns=features.columns)
     scaled_df['tips'] = target.values # Add the target column back to the DataFrame
     scaled_df['pickup_datetime'] = pickup_dates.values  # Add the date column back to the DataFrame
 
-    # print the size of the training dataset
     print(f"The training dataset has {len(scaled_df)} rows")
 
-    # The result is a new table where each feature will have a mean of 0 and a standard deviation of 1
     return scaled_df
 ```
 
@@ -149,44 +133,12 @@ This design choice makes the abstractions we manipulate extremely simple: if it 
 
 In addition to tables, ML workflows deal also with models and as a consequence we need a way to pass models across functions. Bauplan provides a method to persist and retrieve models in a key, value store with the built-in utility `bauplan.store`.
 
-In this way, it is possible to pass Machine Learning models across Bauplan functions.
+In this way, it is possible to pass Machine Learning models across Bauplan functions see [Reference Documentation](https://docs.bauplanlabs.com/en/latest/bauplan.store.html)
+
+The entire code for training and testing a Linear Regression model is the following. This is not the only design pattern for Machine Learning. For instance, we could decide to serialize the model and save it as a file to retrieve it later on in the pipeline or even use a more sophisticated system like a feature store. Ultimately, the framework is powerful enough to allow for more complex designs. For now, it is enough to know that `bauplan.store` provides a simple way to pass a ML model across Bauplan functions in a DAG.
 
 ```python
-@bauplan.model(columns=['*'], materialize=False)
-@bauplan.python('3.11', pip={'scikit-learn': '1.3.2'})
-def train_model(data='my_table'):
-
-    from sklearn.linear_model import LinearRegression
-    reg = LinearRegression().fit(X_train, y_train)
-
-    from bauplan.store import save_obj
-    save_obj("regression", reg)
-
-    return data
-
-
-@bauplan.model(columns=['*'], materialize=False)
-@bauplan.python('3.11', pip={'scikit-learn': '1.3.2'})
-def run_model(data='train_model'):
-
-    from bauplan.store import save_obj
-    reg = load_obj("regression")
-
-        from sklearn.linear_model import LinearRegression
-    y_hat = reg.predict(data='train_model')
-
-    prediction_table = data[['feature']
-    prediction_table['predictions'] = y_hat
-
-    return prediction_table
-```
-
-The entire code for training and testing a Linear Regression model is the following. It is heavily commented, so you can read through it to get a clear understanding of how it works.
-
-This is not the only design pattern for Machine Learning. For instance, we could decide to serialize the model and save it as a file to retrieve it later on in the pipeline or even use a more sophisticated system like a feature store. Ultimately, the framework is powerful enough to allow for more complex designs. For now, it is enough to know that `bauplan.store` provides a simple way to pass a ML model across Bauplan functions in a DAG.
-
-```python
-@bauplan.model(materialize=False)
+@bauplan.model()
 # for this function we specify two dependencies, Pandas 2.2.0 and Scikit-Learn 1.3.2
 @bauplan.python('3.11', pip={'pandas': '2.2.0', 'scikit-learn': '1.3.2'})
 def train_regression_model(
@@ -241,10 +193,9 @@ def train_regression_model(
     return test_set
 
 
-@bauplan.model(materialize=True)
+@bauplan.model(materialization_strategy='REPLACE')
 # for this function we specify two dependencies, Pandas 2.2.0 and Scikit-Learn 1.3.2
 @bauplan.python('3.11', pip={'scikit-learn': '1.3.2', 'pandas': '2.1.0'})
-
 def tip_predictions(
         data=bauplan.Model(
             'train_regression_model',
@@ -255,6 +206,7 @@ def tip_predictions(
     # retrieve the model trained in the previous step of the DAG from the key, value store
     from bauplan.store import load_obj
     reg = load_obj("regression")
+    print(type(reg))
 
     # convert the test set from an Arrow table to a Pandas DataFrame
     test_set = data.to_pandas()
@@ -307,15 +259,15 @@ We will have three different plots to help us understand how good is the linear 
 
 **Actual vs. Predicted Values Plot**: This scatter plot shows how well the predicted values match the actual values. Ideally, the points should lie on the line `y = x`.
 
-![ml2.png](/03-ml-regression-model/img/ml2.png)
+![ml2.png](img%2Fml2.png)
 
 **Residual Plot**: This plot shows the residuals (differences between actual and predicted values) against the predicted values. Ideally, the residuals should be randomly distributed around zero, indicating that the model captures the data's patterns.
 
-![ml3.png](/03-ml-regression-model/img/ml3.png)
+![ml3.png](img%2Fml3.png)
 
 **Distribution of Residuals**: This histogram shows the distribution of the residuals. Ideally, the residuals should be normally distributed around zero.
 
-![ml4.png](/03-ml-regression-model/img/ml4.png)
+![ml4.png](img%2Fml4.png)
 
 The code in there is heavily commented, so you can explore it directly in the notebook.
 
