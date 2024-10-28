@@ -22,3 +22,6 @@ These examples are organized into different folders. Each example is an end-to-e
 
 ## Do you want to know more?
 
+bauplan is a serverless lakehouse: you can load, transform, query data all from your code (CLI or Python). 
+You can learn more [here](https://www.bauplanlabs.com/), read the [docs](https://docs.bauplanlabs.com/) or explore its [architecture](https://arxiv.org/pdf/2308.05368) and [ergonomics](https://arxiv.org/pdf/2404.13682).
+
