@@ -11,17 +11,17 @@ Remember, although your code runs from your local machine, bauplan operates enti
 Your scripts communicate with our cloud platform, which orchestrates and executes data workflows in the cloud.
 The best way to get started is to go through our [tutorial](https://docs.bauplanlabs.com/en/latest/tutorial/index.html)
 
-These examples are organized into different folders. Each example is an end-to-end use case you can use bauplan for. 
+These examples are organized into different folders. Each example is an end-to-end use case you can use bauplan for.
 
 ## Examples
 
 1. [Quick-start]([01-quick-start](01-quick-start/README.md))
-2. [Data appa with Streamlit](02-data-visualization-app%2FREADME.md)
+2. [Data app with Streamlit](02-data-visualization-app%2FREADME.md)
 3. [Machine Learning - Linear regression pipeline](03-ml-regression-model/README.md)
 4. [ETL workflow with Prefect](05-import-data-orchestration%2FREADME.md)
 
 ## Do you want to know more?
 
-bauplan is a serverless lakehouse: you can load, transform, query data all from your code (CLI or Python). 
+bauplan is a serverless lakehouse: you can load, transform, query data all from your code (CLI or Python).
 You can learn more [here](https://www.bauplanlabs.com/), read the [docs](https://docs.bauplanlabs.com/) or explore its [architecture](https://arxiv.org/pdf/2308.05368) and [ergonomics](https://arxiv.org/pdf/2404.13682).
 
