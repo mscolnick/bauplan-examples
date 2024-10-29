@@ -20,7 +20,7 @@ These examples are organized into different folders. Each example is an end-to-e
 
 ## Examples
 
-1. [Quick-start]([01-quick-start](01-quick-start/README.md))
+1. [Quick-start](01-quick-start/README.md)
 2. [Data app with Streamlit](02-data-visualization-app%2FREADME.md)
 3. [Machine Learning - Linear regression pipeline](03-ml-regression-model/README.md)
 4. [ETL workflow with Prefect](05-import-data-orchestration%2FREADME.md)
