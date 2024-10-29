@@ -1,101 +1,96 @@
 """
-
 This file contains a Streamlit app to visualize the table 'top_pickup_location' created with a Bauplan pipeline
 contained in this project. This simple script shows how to use bauplan Python SDK to embed querying functionalities in a webapp.
-
+To run this script run in your terminal:
+    streamlit run viz_app.py -- --branch <YOUR_BRANCH_NAME>
 """
 
-
-# General Streamlit / Visualization imports
 import streamlit as st
 import sys
-import matplotlib.pyplot as plt
-# we import the bauplan Python SDK, with pre-built functions
-# this function allow us to use bauplan as an interactive query engine
-# we can run query against a table in the data catalog and put the data in a Pandas dataframe
+from argparse import ArgumentParser
+import plotly.express as px
 import bauplan
-# what is the target table to query?
-TABLE_NAME = 'top_pickup_locations'  # this is the table materialized by the pipeline in the same example!
+import pandas as pd
 
 
 @st.cache_data()
 def query_as_dataframe(
         _client: bauplan.Client,
         sql: str,
-        branch: str,
-):
+        branch: str
+) -> pd.DataFrame:
     """
-    This function uses the query method to query a table in the data catalog
-    and return as DataFrame
+    Runs a query with bauplan and put the table in a Pandas dataframe
     """
-
     try:
         df = _client.query(query=sql, ref=branch).to_pandas()
         return df
-    except:
-        print("something went wrong with retrieving the data")
+    except bauplan.exceptions.BauplanError as e:
+        print(f"Error: {e}")
+        return None
 
 
-def plot_bar_chart(df):
+def plot_interactive_chart(df: pd.DataFrame) -> None:
     """
-    This function plots a bar chart from the table top_pickup_location
+    Creates an interactive bar chart using Plotly Express
     """
-    plt.figure(figsize=(11, 11))
-    plt.barh(df['Zone'], df['number_of_trips'], color='skyblue', edgecolor='white')
-    plt.ylabel('Zone')
-    plt.xlabel('Number of Trips')
-    plt.title('Number of Trips per Zone')
-    plt.tight_layout()
-    st.pyplot(plt)
-    
-    
-def check_branch_and_table(
-        _client: bauplan.Client,
-        branch: str,
-        table: str
-):
-    """
-    This function uses the bauplan methods get_branches and get_branch to validate that the input branch is valid
-    """
-    selected_branch = branch.strip() 
+    # Define the figure to display in the app
+    fig = px.bar(
+        df,
+        y='Zone',
+        x='number_of_trips',
+        orientation='h',
+        title='Number of Trips per Zone',
+        labels={'number_of_trips': 'Number of Trips', 'Zone': 'Zone'},
+        height=800
+    )
 
-    # check if a branch is specified
-    if not selected_branch:
-        return False
+    # Customize the layout
+    fig.update_layout(
+        showlegend=False,
+        xaxis_title="Number of Trips",
+        yaxis_title="Zone",
+        hoverlabel=dict(bgcolor="white"),
+        margin=dict(l=20, r=20, t=40, b=20)
+    )
 
-    branch_exists = _client.has_branch(branch=selected_branch)
-    if not branch_exists:
-        return False
+    # Display the plot in Streamlit
+    st.plotly_chart(fig, use_container_width=True)
 
-    table_exists = _client.has_table(table=table, ref=selected_branch)
-    if not table_exists:
-        return False
 
-    return True
-        
-
-# THE STREAMLIT APP BEGINS HERE
 def main():
-    # instantiate a bauplan client to use the SDK
-    client = bauplan.Client()
-    # webapp title
-    st.title('A simple data app to visualize taxi rides and locations in NY')
-    # Debug line to ensure correct Python interpreter
-    print(sys.executable)
+    # Set up command line argument parsing
+    parser = ArgumentParser()
+    parser.add_argument('--branch', type=str, required=True, help='Branch name to query data from')
+    args = parser.parse_args()
 
-    # define a text input field where the user can indicate her active branch
-    selected_branch = st.text_input("What branch are you looking for?", " ")
-    # use bauplan sdk to check if the table exists in the selected branch
-    if check_branch_and_table(client, selected_branch, TABLE_NAME):
-        # use bauplan sdk to retrieve the data from the data catalog as a Pandas DataFrame
-        df = query_as_dataframe(client, f"SELECT * FROM {TABLE_NAME}", selected_branch).head(50)
-        if df is not None and not df.empty:
-            st.dataframe(df, width=1200)
-            plot_bar_chart(df)
-        else:
-            st.write('Something went wrong! Please check your branch and try again!')
+    # set up the table name as a global
+    table_name = 'top_pickup_locations'
+
+    st.title('A simple data app to visualize taxi rides and locations in NY')
+
+    # instantiate a bauplan client
+    client = bauplan.Client()
+
+    # Using the branch from command line argument
+    branch = args.branch
+
+    # Query the table top_pickup_locations using bauplan
+    df = query_as_dataframe(
+        _client=client,
+        sql=f"SELECT * FROM {table_name}",
+        branch=branch
+    )
+
+    if df is not None and not df.empty:
+        # Add a toggle for viewing raw data
+        if st.checkbox('Show raw data'):
+            st.dataframe(df.head(50), width=1200)
+
+        # Display the interactive plot
+        plot_interactive_chart(df=df.head(50))
     else:
-        st.write('Please make sure you have typed a valid branch and the table exists in that branch!')
+        st.error('Error retrieving data. Please check your branch name and try again.')
 
 
 if __name__ == "__main__":
