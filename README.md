@@ -1,4 +1,9 @@
-# bauplan examples
+<p align="center">
+  <a href="https://bauplanlabs.com">
+    <img src="https://public.assets.bauplanlabs.com/logo/bauplan-icon-color.png" height="96">
+    <h1 align="center">bauplan examples</h1>
+  </a>
+</p>
 
 This is a collection of examples for [bauplan](https://www.bauplanlabs.com/). Use these examples to learn bauplan, explore its capabilities and how to build your own data applications.
 
