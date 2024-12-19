@@ -130,7 +130,6 @@ def build_initial_cleaned_dataset(
     """
     # we need to point the SDK to the directory containing the pipeline
     d = dirname(dirname(abspath(__file__)))
-    assert d.endswith('analytics'), f"Unexpected directory {d}"
     client.run(
         project_dir=f"{d}/pipeline_initial",
         ref=dev_branch,
