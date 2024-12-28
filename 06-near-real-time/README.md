@@ -5,10 +5,10 @@ A demo implementing near real-time analytics for e-commerce data using bauplan, 
 ## Overview
 
 This example shows how to:
-1. Create analytics tables in Bauplan using the "public.ecommerce" dataset (from [Kaggle's E-commerce Behavior Data](https://www.kaggle.com/datasets/mkechinov/ecommerce-behavior-data-from-multi-category-store/data))
-2. Simulate streaming data by appending rows to core tables and rebuilding downstream tables using Prefect for orchestration
-3. Implement data branching strategies based on the [Write-Audit-Publish pattern](https://github.com/BauplanLabs/wap_with_bauplan_and_prefect/tree/main) to isolate ingestion from pipeline artifacts
-4. Visualize live results through a Streamlit dashboard reflecting the latest data from the main branch
+1. Create analytics tables in bauplan using the "public.ecommerce" dataset (from [Kaggle's E-commerce Behavior Data](https://www.kaggle.com/datasets/mkechinov/ecommerce-behavior-data-from-multi-category-store/data)).
+2. Simulate streaming data by appending rows to core tables and rebuilding downstream tables using Prefect for orchestration.
+3. Implement data branching strategies to isolate ingestion from pipeline artifacts ([Write-Audit-Publish pattern](https://github.com/BauplanLabs/wap_with_bauplan_and_prefect/tree/main)).
+4. Visualize live results through a Streamlit dashboard reflecting the latest data from the main branch.
 
 The project demonstrates near real-time processing, SQL/Python transformations, branch-based development, and live metric visualization.
 
@@ -16,18 +16,20 @@ The project demonstrates near real-time processing, SQL/Python transformations, 
 
 ### bauplan API key
 
-👉👉👉 To use Bauplan, you need an API key for our preview environment: you can request one [here](https://www.bauplanlabs.com/#join). To get familiar with the API, start with our [tutorial](https://docs.bauplanlabs.com/en/latest/tutorial/01_quick_start.html#)
+👉👉👉 To use Bauplan, you need an API key for our sandbox environment: you can request one [here](https://www.bauplanlabs.com/#join). To get familiar with the API, start with our [tutorial](https://docs.bauplanlabs.com/en/latest/tutorial/01_quick_start.html#)
 
 ### AWS Setup
+
 To simulate a continuous stream of incoming data, we use an S3 bucket. You'll need AWS credentials with permissions to:
-- Create and manage S3 buckets
-- Upload files
-- List bucket contents
+- Create and manage S3 buckets.
+- Upload files.
+- List bucket contents.
 
+## Quick Start
 
-## Quick Start (Three Terminal Setup)
+Open three tabs in your terminal.
 
-### Terminal 1: Environment
+### Terminal 1: Set up your environment
 
 Create and activate virtual environment
 
@@ -37,7 +39,8 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### Terminal 2: Prefect Server
+### Terminal 2: Start a Prefect Server
+
 ```bash
 prefect server start
 ```
@@ -45,10 +48,10 @@ prefect server start
 Keep this terminal running - it hosts the Prefect server that manages the scheduled tasks.
 
 
-### Terminal 1: Prefect Setup and Run Pipeline
-
+### Terminal 1: Setup Prefect and run the pipeline
 
 Configure Prefect (required before first run)
+
 ```bash
 prefect config set PREFECT_API_URL=http://127.0.0.1:4200/api
 ```
@@ -56,6 +59,7 @@ prefect config set PREFECT_API_URL=http://127.0.0.1:4200/api
 Set up AWS credentials in one of two ways:
 
 1. Environment variables:
+
 ```bash
 export AWS_ACCESS_KEY_ID='your_key'
 export AWS_SECRET_ACCESS_KEY='your_secret'
@@ -63,6 +67,7 @@ export AWS_DEFAULT_REGION='your-region'  # e.g., us-east-1
 ```
 
 2. AWS config file (recommended):
+
 Follow the [AWS CLI configuration guide](https://docs.aws.amazon.com/cli/v1/userguide/cli-configure-files.html)
 
 After setting up AWS credentials, run:
@@ -76,10 +81,12 @@ python run.py --username your_bauplan_username \
 ```
 
 ### Terminal 3: Streamlit Dashboard
+
 ```bash
 cd dashboard
 streamlit run app.py
 ```
+
 Keep this terminal running to maintain the dashboard server.
 
 ## Project Structure
@@ -108,7 +115,7 @@ Keep this terminal running to maintain the dashboard server.
 2. Ingests data using temporary branches
 3. Updates analytics tables
 
-## Analytics pipeline (pipeline_analytics forlder)
+## Analytics pipeline (pipeline_analytics folder)
 This creates a full funnel of metrics from browsing (views) to purchasing (revenue), enabling analysis of:
 - User engagement (sessions)
 - Conversion (purchases)

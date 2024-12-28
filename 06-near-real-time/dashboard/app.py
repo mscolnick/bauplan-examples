@@ -6,13 +6,16 @@ import plotly.express as px
 
 
 # NOTE: change here if you run analytics pipeline in a different namespace
-NAMESPACE = "examples"
 TABLE_NAME = "ecommerce_metrics_base"
 
 
-def main():
+def main(
+    bauplan_namespace: str
+):
     # Initialize Bauplan client for data access
     client = bauplan.Client()
+
+    NAMESPACE = bauplan_namespace
 
     # --- USER AND BRANCH SELECTION SECTION ---
     # Get all branches from Bauplan
@@ -75,10 +78,18 @@ def main():
             # Display the chart
             st.plotly_chart(fig, use_container_width=True)
 
-
-
         except Exception as e:
             st.error(f"Error fetching data: {e}")
 
+
 if __name__ == "__main__":
-    main()
+    # parse the arguments
+    import argparse
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--bauplan_namespace', type=str, default='bauplan')
+    args = parser.parse_args()
+    # start the app
+    main(
+        bauplan_namespace=args.bauplan_namespace,
+    )
