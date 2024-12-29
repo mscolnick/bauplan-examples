@@ -64,6 +64,7 @@ def plot_bar_chart(
     fig, ax = plt.subplots()
     ax.bar(brands, counts)
     ax.set_title('# of matches by brand')
+    plt.xticks(rotation=45, ha='right')
     st.pyplot(plt)
     
     return
