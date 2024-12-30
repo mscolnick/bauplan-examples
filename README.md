@@ -26,6 +26,7 @@ These examples are organized into different folders. Each example is an end-to-e
 4. [Data Quality and Expectations](04-data-quality-expectations/README.md)
 5. [ETL workflow with Prefect](05-import-data-orchestration/README.md)
 6. [Near Real Time Analytics with Streamlit and Prefect](06-near-real-time/README.md)
+7. [Entity matching in e-commerce with bauplan and LLMs](07-entity-matching-with-llm/README.md)
 
 ## Do you want to know more?
 
