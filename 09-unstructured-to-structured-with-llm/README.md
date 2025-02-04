@@ -62,12 +62,12 @@ The end-to-end use case is managed by the `run.py` script, which leverages the B
 
 1. **Data Ingestion:** Local PDF files containing financial data are uploaded to S3 object storage for durability and performance.
 2. **Metadata Management:** A table in Bauplan stores metadata (S3 locations, company, quarter, etc.), ensuring efficient filtering and access. This step and all subsequent Bauplan operations occur safely within an isolated [data branch](https://docs.bauplanlabs.com/en/latest/concepts/branches.html).
-3. **LLM Processing:** The pipeline in `src/bpln_pipeline` performs:
+3. **LLM Processing:** The pipeline in `bpln_pipeline` performs:
    - Unstructured-to-structured transformation via an LLM
    - Post-processing in Python to refine extracted data
    - Storage of the final structured table within the same namespace
 4. **Production Deployment:** If no errors occur, the temporary branch is merged into production, making the result of the pipeline available for further analysis.
-5. **Data Visualization:** The Streamlit app in `src/app` provides a simple web interface to explore the transformed dataset.
+5. **Data Visualization:** The Streamlit app in `app` provides a simple web interface to explore the transformed dataset.
 
 *Note: The code includes extensive comments for pedagogical purposes. Contact the Bauplan team for further inquiries.*
 
@@ -78,7 +78,6 @@ The end-to-end use case is managed by the `run.py` script, which leverages the B
 Run the following command to process PDFs and generate a structured dataset:
 
 ```bash
-cd src
 python run.py --ingestion-branch your_username.ingestion_branch
 ```
 
@@ -104,7 +103,7 @@ bauplan query "SELECT MAX(usd) as max_usd FROM my_pdfs.sec_10_q_analysis"
 Launch the visualization app:
 
 ```bash
-cd src/app
+cd app
 streamlit run explore_analysis.py
 ```
 
