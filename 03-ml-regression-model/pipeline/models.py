@@ -49,10 +49,8 @@ def clean_taxi_trips(
     # debugging lines to check print the version of Python interpreter and the size of the table
     size_in_gb = data.nbytes / math.pow(1024, 3)
     print(f"This table is {size_in_gb} GB and has {data.num_rows} rows")
-
     # input data is always an Arrow table, so if you wish to use pandas, you need an explicit conversion
     df = data.to_pandas()
-
     # exclude rows based on multiple conditions
     df = df[(df['trip_miles'] > 1.0) & (df['tips'] > 0.0) & (df['base_passenger_fare'] > 1.0)]
 
@@ -122,7 +120,7 @@ def train_regression_model(
     # Split the remaining set into validation and test sets
     validation_threshold_adjusted = validation_threshold / (1 - training_threshold)
     validation_set, test_set = train_test_split(remaining_set, test_size=validation_threshold_adjusted, random_state=42)
-    #print(f"The training dataset has {len(train_set)} rows")
+    # print(f"The training dataset has {len(train_set)} rows")
     print(f"The validation set has {len(validation_set)} rows")
     print(f"The test set has {len(test_set)} rows (remaining)")
 

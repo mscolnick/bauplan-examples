@@ -33,7 +33,7 @@ def process_row(
     Please, respond only with the sentiment, not the markdown text: limit your response to one word, either 'positive', 'neutral', or 'negative'.
     """
 
-    openai_client = OpenAI(api_key=openai_api_key)
+    openai_client = OpenAI()
     max_retries = 5
     retry_delay = 5  # Initial retry delay in seconds
 

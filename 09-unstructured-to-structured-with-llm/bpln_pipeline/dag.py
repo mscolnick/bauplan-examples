@@ -72,6 +72,7 @@ def _pdf_to_markdown(bucket, pdf_path):
             # cut the text after the forward-looking statements
             return result.text_content.split('Forward-Looking Statements')[0]
 
+
 # we need boto3 to get the PDFs from S3 
 # and markitdown to convert the PDFs to text
 @bauplan.python('3.10', pip={'boto3': '1.35.86', 'markitdown': '0.0.1a3'})

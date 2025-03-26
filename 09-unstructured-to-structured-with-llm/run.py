@@ -101,7 +101,7 @@ def upload_pdf_files(
         s3_file = f"{s3_data_folder}/{_file_name}.pdf"
         s3_client.upload_file(pdf_file, s3_bucket, s3_file)
         s3_file_paths.append(s3_file)
-    
+        print(s3_file_paths)
     return s3_file_paths
 
 
