@@ -5,11 +5,3 @@ parameters:
     creation_date_start:
         type: str
         default: "2016-10-19T00:00:00+00:00"
-    openai_key:
-        type: secret
-        default: KJz0FNBVqw502oHgVEsE17yiPJMqO/a4eixBEzGi8m6uum9/OCuXeWDHSVE/EZLfpIuwWWvIlK5k27cjinGL0Sg9WpdUOrbqbD+B/0yfk0ga3axo9AplKcUV8UvR73cLhnNSc9zzIog6kcTTC5AqW6IZ4FR/ZgMC3NaUP2pleig8dOBpkVkyy7t4b06XOgwaFZ4JKXyfpoQiUV4IssbbcMtxVCorKYuRKNibgpD0Ksf7lLq7JpZv7bOgDiAH+7Y5ey/gd4SJtavqxM1XJBZRKrGQjgiaj+QLjx0f3mZktd4awTmpsLD2WHtn5TrebvgDXejOp4sbWpfn9jgNzWYHoHaSp4/bYtlqdIyKcDvo1UCyOVPSLpRKYhPV1KtXzXlRkjDbZ8RpNeeTmvzGim6e4bJubaIVkt945HSA7l65+KfzFP83O71rCX3ihlOBHqlAu6SisLBdOxuWB95yHhFNMqpDrMtQD2Ny56qVqqH46PFsLExklGh7dBElAZny3yZqzOlm59mYS61OuXzltEGQryiiPq/QPNxcX/LATzC76SQK4DCeE7ji60TgDeCpwh8GGP2AiXB0CHQiuApgIJUhHzOMJ0oHWNEG1RYGNuZc3q57sSpxKc8URJkxsN8QPcFdgx9Z1x3j82TTvPt5wZQu4rYgOSEWM7C/utE7poWOgeA=
-        key: awskms:///arn:aws:kms:us-east-1:381492128837:key/mrk-b5de2955e645426a9dfd18dcd0cb3ca5
-    pinecone_key:
-        type: secret
-        default: ZdapVpooJ3VjcMVp5Ktxdm7SbLI7d31H6EHlzhB+94xxwMbRhJLKoThGzsvJTetKLvulBGqkRqloSG1zdvWtYjsuBl+3ExofdKp1K8ZGwsEs3HQm1F86E0C4D93tzWhpsuUjQqugnAv6gUn7zod15c/r+Cd1Akaj4Mf49Ba92q5K3CPCfljqd5DuVP4wYYsQ0ngeRElu2s3d5QK1TMZ0sP+gBhV51bCSX+ewNYsCOmRGNeEo/Ee+yet++uPGdm8BW4CQYQveDIvz38o02mX3y61pXW5lJPKCHHdMEz/+0IUiaLq+QdJbJYSyU/4xUvUdUZyOGoi+JtnMtozDz0MkrZXI3DF9daHCYyKlLnQO0Eb3i055E80X7UF4yAUZVU5Uve2nRO2sY5LwbjoDcnYQ1Ne54NkX5uvhv4gO9CmlEkmEYn37/Hf07aUEXsG9wVxBZgb0QOXeCv3QtT0o66G0zHzy92zRQqqDXoCGuONesxMmt4zpzX5Pqp/H6HDXAL+q+oVlL83xdMyxMezGMAgya8WkZSAAqNmqfL/NLlRxn7u2RLzIdkIVAgx8WT08HL1WuZRm2glpH5YMwYmI0z6hSyfdPM8TNejcMtiug8qq5/D9eirl1ZoJAIx6hrJa1p/be3EINVo6IT5pFHa+5bb5LOp2qb5dL3HL7gGePIDULGs=
-        key: awskms:///arn:aws:kms:us-east-1:381492128837:key/mrk-b5de2955e645426a9dfd18dcd0cb3ca5
