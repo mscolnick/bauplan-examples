@@ -1,36 +1,25 @@
 # RAG with bauplan and pinecone
 
-
 ## Overview
-This is a reference implementation of a RAG pipeline (and LLM app) built using [bauplan](https://www.bauplanlabs.com/) on Iceberg for data preparation and training, and [pinecone](https://www.pinecone.io/) for serving.
+This is a reference implementation of an end-to-end Retrieval-Augmented Generation (RAG) pipeline using bauplan for data preparation and Pinecone for vector storage and retrieval.
 
-## Use case
+## Use Case
+We build a conversational support agent capable of answering technical questions using a dataset of StackOverflow Q&A. The pipeline:
+* Uses bauplan for data ingestion, joining, transformation, and exploration.
+* Generates text embeddings via Pinecone’s API and stores them in a vector database.
+* Includes a [Streamlit](https://streamlit.io/) app to explore the embedding space and interact with a natural language Q&A interface powered by Pinecone and OpenAI.
 
-Given historical support tickets (StackOverflow-type questions and answers), how do we build a self-service app where users can ask questions and get answers in real-time?
+Q&A data is sourced from the [Kaggle StackSample Dataset](https://www.kaggle.com/datasets/stackoverflow/stacksample), available in the [bauplan sandbox](https://www.bauplanlabs.com/#join).
 
-We use bauplan to build a data pipeline for RAG: we start from historical data in tabular formats, do some data joining, wrangling and exploration, then leverage Pinecone's APIs to get text embeddings and store them in a powerfull vector database.
-
-We then build a Streamlit app to explore the embedding space, and provide a simple UI for users to get answers based on natural language queries (powered by Pinecone and OpenAI APIs).
-
-_Credits_:
-
- * Q&A data come from the _StackSample Dataset_ (originally from [Kaggle](https://www.kaggle.com/datasets/stackoverflow/stacksample), available as sample dataset in the bauplan sandbox).
-
-### Data flow
-
-In the end-to-end example, the data flow as follows between tools and environments:
-
-1. the original dataset is stored in three bauplan-backed Iceberg tables. When joining bauplan, the dataset is already available in the `public` namespace;
-2. the pipeline in `src/bpln_pipeline` contains the data modelling and embedding-for-rag code, in simple decorated Python functions; running the pipeline in bauplan will execute these functions and store the embeddings both as an Iceberg table and in Pinecone;
-3. the streamlit app in `src/app` showcases how to get back the embeddings from bauplan (high latency / high throughput) for analysis and visualization, and how to interact with a live q&a system, powered by the vector index in Pinecone and an off-the-shelf LLM for text generation (e.g. OpenAI).
-
-Note: both the pipeline and the app code are heavily commented and written with pedagogical purposes in mind. However, do not hesitate to reach out to the bauplan team for any questions or clarifications.
+## Architecture & Data Flow
+* **Data source:** The StackOverflow dataset (questions, answers, tags) is available as Iceberg tables in the `public` namespace of bauplan.
+* **Pipeline:** Defined in `src/bpln_pipeline`, the pipeline processes, embeds, and stores the data in both Pinecone and S3 as an Iceberg table.
+* **Data App:** The Streamlit app in src/app retrieves data for exploration and serves as a UI for live Q&A using Pinecone and an LLM (e.g., OpenAI).
+<img src="img/rag-end-to-end-pipeline.jpeg" width="1000"/>
 
 ## Setup
-
-### Python environment
-
-To run the project, you need to have Python 3.10 (or later) installed. We recommend using a virtual environment to manage dependencies:
+### Python Environment
+Ensure Python 3.10+ is installed, and use a virtual environment:
 
 ```bash
 python3 -m venv venv
@@ -38,22 +27,22 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### bauplan
+### Bauplan
+* [Join Bauplan](https://www.bauplanlabs.com/#join) and create your username + API key.
+* Complete [the 3-minute tutorial](https://docs.bauplanlabs.com/en/latest/tutorial/index.html).
 
-* [Join](https://www.bauplanlabs.com/#join) the bauplan sandbox, sign in, create your username and API key;
-* complete do the 3-min [tutorial](https://docs.bauplanlabs.com/en/latest/tutorial/index.html) to get familiar with the platform;
-* when you gain access, public datasets (including the one used in this project) will be available for you to start building pipelines.
+Several public datasets will be accessible in the sandbox, including the one used here.
 
 ### Pinecone
+* Create a cluster on [Pinecone](https://docs.pinecone.io/guides/get-started/quickstart).
+* Obtain your API key from the Pinecone dashboard.
 
-* Create a cluster on [Pinecone](https://docs.pinecone.io/guides/get-started/quickstart);
-* get your API key from the Pinecone dashboard.
+### OpenAI
+* Get an [OpenAI](https://platform.openai.com/api-keys) api key to call their APIs.
 
-## Run
-
-### Check out the dataset
-
-Using bauplan, it is trivial to get acquainted with the dataset and its schema. We have three tables for this use case, questions, answers and tags. You can query the table structure directly from the CLI:
+## Running the Project
+### Explore the Dataset
+You can use the CLI to inspect table schemas in the data catalog:
 
 ```bash
 bauplan table get public.stack_overflow_questions
@@ -61,15 +50,15 @@ bauplan table get public.stack_overflow_answers
 bauplan table get public.stack_overflow_tags
 ```
 
-You can find out the distribution of tags in the dataset, for example, by directly querying the table in the CLI:
+To explore the data, you can use Bauplan query engine directly in the CLI. 
+For example, let us run a query to explore tag distribution:
 
 ```bash
-bauplan query "SELECT tag, COUNT(*) AS _C FROM public.stack_overflow_tags  GROUP BY 1 ORDER BY _C DESC"
+bauplan query "SELECT tag, COUNT(*) AS _C FROM public.stack_overflow_tags GROUP BY 1 ORDER BY _C DESC"
 ```
 
-### Running the data pipeline with bauplan
-
-To run the pipeline - i.e. the DAG going from the source tables to embeddings and a fully built index in Pinecone -- you just need to create a [data branch](https://docs.bauplanlabs.com/en/latest/tutorial/02_catalog.html) to develop safely in the cloud:
+### Run the Data Pipeline
+First of all, create a [data branch](https://docs.bauplanlabs.com/en/latest/tutorial/02_catalog.html) and checkout to it - remember that you will need your username for this:
 
 ```bash
 cd src/bpln_pipeline
@@ -77,58 +66,44 @@ bauplan branch create <YOUR_USER_NAME>.soflow_rag
 bauplan branch checkout <YOUR_USER_NAME>.soflow_rag
 ```
 
-Now, add the Pinecone API key as a secret to the project (note: don't commit the yml to a public repo!): this will allow bauplan to connect to the cluster securely through asymmetric encryption:
+Add your Pinecone and your OpenAI keys securely (never commit them):
 
 ```bash
-bauplan parameter set --name pinecone_key --value aaabbbccc --type secret
+bauplan parameter set --name pinecone_key --value <YOUR_PINECONE_KEY> --type secret
+bauplan parameter set --name openai_key --value <YOUR_OPENAI_KEY> --type 
 ```
 
-If you inspect your `bauplan_project.yml` file, the new parameter will be found:
-
-```yaml
-parameters:
-    pinecone_key:
-        type: secret
-        default: kUg6q4141413...
-        key: awskms:///arn:aws:kms:us-...
-```
-
-You can now run the DAG with a command:
-
+Verify the parameter in `bauplan_project.yml` in the folder `src/bpln_pipeline`. Then run the pipeline:
 ```bash
+cd src/bpln_pipeline
 bauplan run
 ```
 
-You can check that we successfully created the table with the embedding from the CLI:
-
+The run will write a new table called `one_big_qa_table_with_embeddings` in your active data branch. 
+To check the resulting table run:
 ```bash
 bauplan table get one_big_qa_table_with_embeddings
 ```
-
-You could also query the intermediate table, to get (for example) the number of answers per question:
-
+Run a query to see the data inside the table:
 ```bash
-bauplan query "SELECT question_id, COUNT(*) as _C FROM one_big_qa_table GROUP BY question_id ORDER BY 2 DESC LIMIT 10"
+bauplan query "SELECT question_id, COUNT(*) as _C FROM one_big_qa_table GROUP BY question_id ORDER BY _C DESC LIMIT 10"
 ```
+Example query:
 
-### Answering questions with Pinecone (and OpenAI)
-
-We can visualize the structure of the embedding space using the Streamlit app, and then do the runtime RAG to simulate a user asking support questions. The RAG flow leverages the index we built running bauplan, together with a LLM model for the answer generation (in our case, we use OpenAI).
-
-To run the app, make sure to pass a valid OpenAI API key as an environment variable, together with your Pinecone API key:
+## Run the Streamlit App
+To run the Streamlit app you will simply have to run this command and provide your username:
 
 ```bash
 cd src/app
-OPENAI_API_KEY=$$$ PINECONE_KEY=$$$ streamlit run explore_and_answer.py
+streamlit run explore_and_answer.py -- --bauplan_username <YOUR_USERNAME>
 ```
 
-The app will open in your browser, and you can start exploring the embedding space and asking questions. Note how easy is to interact with both bauplan and Pinecone from any Python process!
+The app assumes you have run the pipeline in a branch: once the app is running, select the right branch to query the data to get started.
+Note that the command `streamlit run` parses parameters slightly differently, so you need to use the `--` separator to pass arguments to the script (`streamlit run explore_and_recommend.py -- --bauplan_username foo`)
+The app will open in your browser for embedding exploration and question answering.
 
-A video walkthrough of the app is available [here](https://www.youtube.com/watch?v=3Q6J9Q1Z9ZQ).
-
-## Where to go from here?
-
-TBD
+<img src="img/streamlit-app_1.jpeg" width="1000"/>
+<img src="img/streamlit_app_2.jpeg" width="1000"/>
 
 ## License
 
