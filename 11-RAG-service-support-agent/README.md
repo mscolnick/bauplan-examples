@@ -10,4 +10,4 @@ If you want to get familiar with Bauplan, start with our [tutorial](https://docs
 
 ## Step by Step
 
-👉👉👉 To get your hands dirty and play with this example, check out [our documentation](https://docs.bauplanlabs.com/en/latest/examples/rag.html.html).
+👉👉👉 To get your hands dirty and play with this example, check out [our documentation](https://docs.bauplanlabs.com/en/latest/examples/rag.html).
